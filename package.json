@@ -1,0 +1,17 @@
+{
+  "name": "apex-albion",
+  "version": "1.0.0",
+  "description": "APEX Alliance Albion Discord Bot",
+  "main": "apex-albion.js",
+  "dependencies": {
+    "discord.io": "^2.5.1",
+    "request": "^2.81.0",
+    "wait.for": "^0.6.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mark Arneman",
+  "license": "ISC"
+}
