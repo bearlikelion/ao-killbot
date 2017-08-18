@@ -10,30 +10,22 @@ const request = require('request');
 const Discord = require('discord.io');
 const config = require("./config.json");
 
+// Channel IDs
+// 8-bit: 348106067319980034
+// APEX:  347871354076528641
+
 var client = new Discord.Client({
     autorun: true,
     token: config.token
 });
 
-function killboardCheck() {
-    do {
-        var result = wait.for(updateKillboard);
-    } while (true);
-}
-
-function updateKillboard() {
-    console.log('Updating Killboard');
-    getKills();
-};
-
 function getKills(limit = 51, offset = 0) {
-    console.log('  Get kills');
+    console.log('Get kills');
     request('https://gameinfo.albiononline.com/api/gameinfo/events?limit='+limit+'&offset='+offset, function(error, response, body) {
         // If request was successful status:(200)
         if (!error && response.statusCode == 200) {
             var events = JSON.parse(body);
             parseKills(events);
-            return true;
         } else {
             console.log('error:', error); // Print the error if one occurred
             console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
@@ -42,14 +34,20 @@ function getKills(limit = 51, offset = 0) {
 };
 
 function parseKills(events) {
-    console.log('    Parse kills');
-    events.forEach(function(kill) {
+    console.log('  Parse kills');
+    var count = 0;
+    var breaker = lastRecordedKill;
+
+    events.some(function(kill, index) {
+        if (index == 0) {
+            lastRecordedKill = kill.EventId;
+        }
         // Alliance KILL
         if (kill.Killer.AllianceName == config.allianceName) {
             console.log('Alliance Kill');
             client.sendMessage({
                 to: config.botChannel,
-                message: kill.Killer.Name + " killed " + kill.Victim.Name
+                message: "[VICTORY] " + kill.Killer.Name + " killed " + kill.Victim.Name
             });
         }
         // Alliance DEATH
@@ -57,10 +55,17 @@ function parseKills(events) {
             console.log('Alliance Death');
             client.sendMessage({
                 to: config.botChannel,
-                message: kill.Victim.Name + " was killed by" + kill.Killer.Name
+                message: "[DEFEAT] " + kill.Victim.Name + " was killed by " + kill.Killer.Name
             });
         }
+        else {
+            count++;
+        }
+
+        return kill.EventId == breaker;
     });
+
+    console.log('  Skipped ' + count + ' kills');
 };
 
 /**
@@ -75,7 +80,11 @@ client.on('ready', function() {
     });
 
     console.log('['+Date.now()+'] Logged in as %s \n', client.username);
-    wait.launchFiber(updateKillboard);
+    getKills();
+
+    var timer = setInterval(function() {
+        getKills();
+    }, 30000);
 });
 
 /**
