@@ -2,15 +2,137 @@
 * @Author: Mark Arneman
 * @Date:   2017-08-18 11:12:18
 * @Last Modified by:   Mark Arneman
-* @Last Modified time: 2017-08-18 12:43:41
+* @Last Modified time: 2017-08-18 17:01:18
 */
 
-/**
- * Define static constants and load libraries
- */
-const config = require("./config.json");
+// Define static constants
+const config = require('./config.json');
+
+// Require modules
 const Discord = require('discord.js');
+const request = require('request');
 const client = new Discord.Client();
+
+var lastRecordedKill = -1;
+
+/**
+ * Fetch recent kills from the Gameinfo API
+ * @param  {Number} limit  [max kills to get]
+ * @param  {Number} offset [offset for first kill]
+ * @return {json} [json array of events]
+ */
+function fetchKills(limit = 51, offset = 0) {
+    request({
+        uri: 'https://gameinfo.albiononline.com/api/gameinfo/events?limit='+limit+'&offset='+offset,
+        json: true
+    }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            parseKills(body);
+        } else {
+            console.log('Error: ', error); // Log the error
+        }
+    });
+}
+
+/**
+ * Parse returned JSON from Gameinfo to
+ * find alliance members on the killboard
+ * @param  {json} events
+ */
+function parseKills(events) {
+    var count = 0;
+    var breaker = lastRecordedKill;
+
+    events.some(function(kill, index) {
+        // Save the most recent kill for tracking
+        if (index == 0) {
+            lastRecordedKill = kill.EventId;
+        }
+
+        // Don't process data for the breaker KILL
+        if (kill.EventId != breaker)
+            // Alliance KILL
+            if (kill.Killer.AllianceName == config.allianceName || kill.Victim.AllianceName == config.allianceName) {
+                postKill(kill);
+            } else {
+                count++;
+            }
+
+        return kill.EventId == breaker;
+    });
+
+    console.log('- Skipped ' + count + ' kills');
+}
+
+function postKill(kill, channel = config.botChannel) {
+    var victory = false;
+    if (kill.Killer.AllianceName == config.allianceName) {
+        victory = true;
+    }
+
+    var assistedBy = "";
+    if (kill.numberOfParticipants == 1) {
+        var soloKill = [
+            'All on their own',
+            'Without assitance from anyone',
+            'All by himself',
+        ];
+        assistedBy = soloKill[Math.floor(Math.random() * soloKill.length)];
+    } else {
+        var assists = [];
+        kill.Participants.forEach(function(participant) {
+            assists.push(participant.Name);
+        })
+        assistedBy = "Assisted By: " + assists.join(', ');
+    }
+
+    itemCount = 0;
+    kill.Victim.Inventory.forEach(function(inventory) {
+        if (inventory !== null) {
+            itemCount++;
+        }
+    });
+
+    client.channels.get(channel).send({embed: {
+        color: victory ? 0x008000 : 0x800000,
+        author: {
+            name: kill.Killer.Name + " killed " + kill.Victim.Name,
+            icon_url: victory ? 'https://i.imgur.com/CeqX0CY.png' : 'https://albiononline.com/assets/images/killboard/kill__date.png',
+            url: 'https://albiononline.com/en/killboard/kill/'+kill.EventId
+        },
+        title: assistedBy + " destroying " + itemCount + " items",
+        description: 'Gaining ' + kill.TotalVictimKillFame + ' fame',
+        thumbnail: {
+            url: 'https://gameinfo.albiononline.com/api/gameinfo/items/' + kill.Killer.Equipment.MainHand.Type + '.png'
+        },
+        timestamp: kill.TimeStamp,
+        fields: [
+            {
+                name: "Killer Guild",
+                value: (kill.Killer.AllianceName ? "["+kill.Killer.AllianceName+"] " : '') + kill.Killer.GuildName,
+                inline: true
+            },
+            {
+                name: "Victim Guild",
+                value: (kill.Victim.AllianceName ? "["+kill.Victim.AllianceName+"] " : '') + kill.Victim.GuildName,
+                inline: true
+            },
+            {
+                name: "Killer IP",
+                value: kill.Killer.AverageItemPower.toFixed(2),
+                inline: true
+            },
+            {
+                name: "Victim IP",
+                value: kill.Victim.AverageItemPower.toFixed(2),
+                inline: true
+            },
+        ],
+        footer: {
+            text: "Kill #" + kill.EventId
+        }
+    }});
+}
 
 /**
  * Wait until ready and logged in
@@ -25,8 +147,15 @@ client.on('ready', () => {
         client.user.setUsername(config.username);
     }
 
-    // Set 'Playing' in discord
+    // Set 'Playing Game' in discord
     client.user.setGame(config.playingGame); // broken due to discord API changes
+
+    fetchKills();
+
+    // Fetch kills every 30s
+    var timer = setInterval(function() {
+        fetchKills();
+    }, 30000);
 });
 
 /**
@@ -34,12 +163,26 @@ client.on('ready', () => {
  */
 client.on('message', message => {
     if (message.content.indexOf(config.cmdPrefix) !== 0 || message.author.bot) return;
-    else {
-        var command = message.content.substr(1).toLowerCase();
+    else { // Execute command!
+        var args = message.content.slice(config.cmdPrefix.length).trim().split(/ +/g);
+        var command = args.shift().toLowerCase();
 
         // Test Command - !ping
         if (command === 'ping') {
             message.reply('pong');
+        }
+
+        else if (command === 'kbinfo') {
+            request({
+                json: true,
+                uri: 'https://gameinfo.albiononline.com/api/gameinfo/events/' + args[0]
+            }, function (error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    postKill(body, message.channel.id);
+                } else {
+                    console.log('Error: ', error); // Log the error
+                }
+            });
         }
 
         // [ADMIN] - clear config.botChannel messages
