@@ -5,7 +5,12 @@
   "main": "apex-albion.js",
   "dependencies": {
     "discord.io": "^2.5.1",
+    "discord.js": "^11.1.0",
     "request": "^2.81.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bearlikelion/ao-killbot"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
