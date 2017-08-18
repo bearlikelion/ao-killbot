@@ -16,22 +16,24 @@ var client = new Discord.Client({
 });
 
 function killboardCheck() {
-    var result = wait.for(updateKillboard);
+    do {
+        var result = wait.for(updateKillboard);
+    } while (true);
 }
 
 function updateKillboard() {
-    setTimeout(function() {
-        console.log('Updating Killboard');
-        getKills();
-    }, 5000);
+    console.log('Updating Killboard');
+    getKills();
 };
 
 function getKills(limit = 51, offset = 0) {
+    console.log('  Get kills');
     request('https://gameinfo.albiononline.com/api/gameinfo/events?limit='+limit+'&offset='+offset, function(error, response, body) {
         // If request was successful status:(200)
         if (!error && response.statusCode == 200) {
             var events = JSON.parse(body);
             parseKills(events);
+            return true;
         } else {
             console.log('error:', error); // Print the error if one occurred
             console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
@@ -40,6 +42,7 @@ function getKills(limit = 51, offset = 0) {
 };
 
 function parseKills(events) {
+    console.log('    Parse kills');
     events.forEach(function(kill) {
         // Alliance KILL
         if (kill.Killer.AllianceName == config.allianceName) {
