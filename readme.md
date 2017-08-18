@@ -6,6 +6,13 @@ A discord bot for Albion Online's killboard
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
+![Screenshot](https://i.imgur.com/gLnvJpX.png)
+
+### Usage
+* !ping - replies with @user pong
+* !kbclear - delets all messages in the config.botChannel
+* !kbinfo <eventId> - displays the killboard post for a specific kill to the current channel
+
 ### Prerequisites
 
 * [NodeJS](https://nodejs.org/)

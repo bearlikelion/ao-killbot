@@ -2,7 +2,7 @@
 * @Author: Mark Arneman
 * @Date:   2017-08-18 11:12:18
 * @Last Modified by:   Mark Arneman
-* @Last Modified time: 2017-08-18 17:01:18
+* @Last Modified time: 2017-08-18 17:34:57
 */
 
 // Define static constants
@@ -61,7 +61,7 @@ function parseKills(events) {
         return kill.EventId == breaker;
     });
 
-    console.log('- Skipped ' + count + ' kills');
+    // console.log('- Skipped ' + count + ' kills');
 }
 
 function postKill(kill, channel = config.botChannel) {
