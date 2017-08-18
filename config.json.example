@@ -1,7 +1,11 @@
 {
-	"prefix": "!",
+	"cmdPrefix": "!",
 	"allianceName": "Apex",
+	"username": "AO-Killbot",
+	"admins": [
+		""
+	],
+	"botChannel": "",
 	"playingGame": "Albion Killboard Bot",
-	"token": "",
-	"botChannel": ""
+	"token": ""
 }
