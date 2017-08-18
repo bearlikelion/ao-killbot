@@ -1,10 +1,9 @@
 {
-  "name": "apex-albion",
+  "name": "ao-killbot",
   "version": "1.0.0",
-  "description": "APEX Alliance Albion Discord Bot",
+  "description": "Albion Online killboard Discord bot",
   "main": "apex-albion.js",
   "dependencies": {
-    "discord.io": "^2.5.1",
     "discord.js": "^11.1.0",
     "request": "^2.81.0"
   },
