@@ -39,28 +39,32 @@ function parseKills(events) {
     var breaker = lastRecordedKill;
 
     events.some(function(kill, index) {
+        // Save the most recent kill for tracking
         if (index == 0) {
             lastRecordedKill = kill.EventId;
         }
-        // Alliance KILL
-        if (kill.Killer.AllianceName == config.allianceName) {
-            console.log('Alliance Kill');
-            client.sendMessage({
-                to: config.botChannel,
-                message: "[VICTORY] " + kill.Killer.Name + " killed " + kill.Victim.Name
-            });
-        }
-        // Alliance DEATH
-        else if (kill.Victim.AllianceName == config.allianceName) {
-            console.log('Alliance Death');
-            client.sendMessage({
-                to: config.botChannel,
-                message: "[DEFEAT] " + kill.Victim.Name + " was killed by " + kill.Killer.Name
-            });
-        }
-        else {
-            count++;
-        }
+
+        // Don't process data for the breaker KILL
+        if (kill.EventId != breaker)
+            // Alliance KILL
+            if (kill.Killer.AllianceName == config.allianceName) {
+                console.log('Alliance Kill');
+                client.sendMessage({
+                    to: config.botChannel,
+                    message: "[VICTORY] " + kill.Killer.Name + " killed " + kill.Victim.Name + "\nKillboard: https://albiononline.com/en/killboard/kill/" + kill.EventId
+                });
+            }
+            // Alliance DEATH
+            else if (kill.Victim.AllianceName == config.allianceName) {
+                console.log('Alliance Death');
+                client.sendMessage({
+                    to: config.botChannel,
+                    message: "[DEFEAT] " + kill.Victim.Name + " was killed by " + kill.Killer.Name + "\nKillboard: https://albiononline.com/en/killboard/kill/" + kill.EventId
+                });
+            }
+            else {
+                count++;
+            }
 
         return kill.EventId == breaker;
     });
@@ -80,11 +84,11 @@ client.on('ready', function() {
     });
 
     console.log('['+Date.now()+'] Logged in as %s \n', client.username);
-    getKills();
+    // getKills();
 
-    var timer = setInterval(function() {
-        getKills();
-    }, 30000);
+    // var timer = setInterval(function() {
+    //     getKills();
+    // }, 30000);
 });
 
 /**
