@@ -8,7 +8,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-[NodeJS](https://nodejs.org/)
+* [NodeJS](https://nodejs.org/)
 
 ### Installing
 
@@ -16,10 +16,10 @@ These instructions will get you a copy of the project up and running on your loc
 npm install
 cp config.json.example config.json
 -- Edit config.json in a text editor of your choice --
-npm apex-albion.js
+node ao-killbot.js
 ```
 
-## Built With
+### Built With
 
 * [Discord.js](https://github.com/hydrabolt/discord.js/) - Discordapp library for Node.js and browsers.
 * [Request](https://github.com/request/request) - Simplified HTTP client
