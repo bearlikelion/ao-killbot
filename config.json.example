@@ -1,6 +1,7 @@
 {
 	"cmdPrefix": "!",
 	"allianceName": "Apex",
+	"guildName": "8-bit",
 	"username": "AO-Killbot",
 	"admins": [
 		""
