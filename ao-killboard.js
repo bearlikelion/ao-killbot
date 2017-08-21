@@ -52,7 +52,9 @@ function parseKills(events) {
         // Don't process data for the breaker KILL
         if (kill.EventId != breaker)
             // Alliance KILL
-            if (kill.Killer.AllianceName == config.allianceName || kill.Victim.AllianceName == config.allianceName) {
+            if (kill.Killer.AllianceName.toLowerCase() == config.allianceName.toLowerCase() || kill.Victim.AllianceName.toLowerCase() == config.allianceName.toLowerCase()) {
+                postKill(kill);
+            } else if (kill.Killer.GuildName.toLowerCase() == config.guildName.toLowerCase() || kill.Victim.GuildName.toLowerCase() == config.guildName.toLowerCase()) {
                 postKill(kill);
             } else {
                 count++;
@@ -76,12 +78,15 @@ function postKill(kill, channel = config.botChannel) {
             'All on their own',
             'Without assitance from anyone',
             'All by himself',
+            'SOLO KILL'
         ];
         assistedBy = soloKill[Math.floor(Math.random() * soloKill.length)];
     } else {
         var assists = [];
         kill.Participants.forEach(function(participant) {
-            assists.push(participant.Name);
+            if (participant.Name != kill.Killer.Name) {
+                assists.push(participant.Name);
+            }
         })
         assistedBy = "Assisted By: " + assists.join(', ');
     }
@@ -93,28 +98,33 @@ function postKill(kill, channel = config.botChannel) {
         }
     });
 
-    client.channels.get(channel).send({embed: {
+    var itemsDestroyedText = "";
+    if (itemCount > 0) {
+        itemsDestroyedText = " destroying " + itemCount + " items";
+    }
+
+    var embed = {
         color: victory ? 0x008000 : 0x800000,
         author: {
             name: kill.Killer.Name + " killed " + kill.Victim.Name,
             icon_url: victory ? 'https://i.imgur.com/CeqX0CY.png' : 'https://albiononline.com/assets/images/killboard/kill__date.png',
             url: 'https://albiononline.com/en/killboard/kill/'+kill.EventId
         },
-        title: assistedBy + " destroying " + itemCount + " items",
+        title: assistedBy + itemsDestroyedText,
         description: 'Gaining ' + kill.TotalVictimKillFame + ' fame',
         thumbnail: {
-            url: 'https://gameinfo.albiononline.com/api/gameinfo/items/' + kill.Killer.Equipment.MainHand.Type + '.png'
+            url: (kill.Killer.Equipment.MainHand.Type ? 'https://gameinfo.albiononline.com/api/gameinfo/items/' + kill.Killer.Equipment.MainHand.Type + '.png' : "https://albiononline.com/assets/images/killboard/kill__date.png")
         },
         timestamp: kill.TimeStamp,
         fields: [
             {
                 name: "Killer Guild",
-                value: (kill.Killer.AllianceName ? "["+kill.Killer.AllianceName+"] " : '') + kill.Killer.GuildName,
+                value: (kill.Killer.AllianceName ? "["+kill.Killer.AllianceName+"] " : '') + (kill.Killer.GuildName ? kill.Victim.GuildName : '<none>'),
                 inline: true
             },
             {
                 name: "Victim Guild",
-                value: (kill.Victim.AllianceName ? "["+kill.Victim.AllianceName+"] " : '') + kill.Victim.GuildName,
+                value: (kill.Victim.AllianceName ? "["+kill.Victim.AllianceName+"] " : '') + (kill.Victim.GuildName ? kill.Victim.GuildName : '<none>'),
                 inline: true
             },
             {
@@ -131,7 +141,11 @@ function postKill(kill, channel = config.botChannel) {
         footer: {
             text: "Kill #" + kill.EventId
         }
-    }});
+    };
+
+    console.log(embed);
+
+    client.channels.get(channel).send({embed: embed});
 }
 
 /**
