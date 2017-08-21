@@ -18,12 +18,32 @@ These instructions will get you a copy of the project up and running on your loc
 * [NodeJS](https://nodejs.org/)
 
 ### Installing
+* Install Node JS on the machine that will run the bot
+* Create a new [Discord Application](https://discordapp.com/developers/applications/me)
+* Copy config.json.example --> config.json
+* Add the 'APP BOT USER' token as 'token' in 'config.json'
+* Enable developer mode in Discord (Settings -> Appearance)
+* Right click the channel you wish to use as the kill board, and Copy ID
+* Set ID as 'botChannel'
+* OPTIONAL: Set User IDs for admin accounts
 
-```
-npm install
-cp config.json.example config.json
--- Edit config.json in a text editor of your choice --
-node ao-killbot.js
+###### * to only display Guild kills and not alliance, set allianceName to something that cannot exist i.e <NONE>
+
+Example: config.json
+--
+```json
+{
+	"cmdPrefix": "!",
+	"allianceName": "<NONE>",
+	"guildName": "8-bit",
+	"username": "AO-Killbot",
+	"admins": [
+		"224865398034079430"
+	],
+	"botChannel": "445822300890946337",
+	"playingGame": "Albion Killboard Bot",
+	"token": "zMznafHXfbgaD3k0.hYN.CDTzsMHXz_35MNMiGyLOT-8EoQotgEs10iZAa7"
+}
 ```
 
 ### Built With
