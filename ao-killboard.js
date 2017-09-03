@@ -68,7 +68,7 @@ function parseKills(events) {
 
 function postKill(kill, channel = config.botChannel) {
     var victory = false;
-    if (kill.Killer.AllianceName == config.allianceName) {
+    if (kill.Killer.AllianceName.toLowerCase() == config.allianceName.toLowerCase() || kill.Killer.GuildName.toLowerCase() == config.guildName.toLowerCase()) {
         victory = true;
     }
 
