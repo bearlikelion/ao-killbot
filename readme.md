@@ -19,6 +19,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Installing
 * Install Node JS on the machine that will run the bot
+* Execute 'npm install' in the directory to download the dependencies 
 * Create a new [Discord Application](https://discordapp.com/developers/applications/me)
 * Copy config.json.example --> config.json
 * Add the 'APP BOT USER' token as 'token' in 'config.json'
