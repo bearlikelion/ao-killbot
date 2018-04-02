@@ -1,0 +1,21 @@
+{
+  "name": "ao-killbot",
+  "version": "1.0.0",
+  "description": "Albion Online killboard Discord bot",
+  "main": "ao-killbot.js",
+  "author": "Mark Arneman",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bearlikelion/ao-killbot"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
+    "start": "npm run build && node dist/ao-killboard.js"
+  },
+  "dependencies": {
+    "discord.js": "^11.1.0",
+    "request": "^2.81.0"
+  }
+}
