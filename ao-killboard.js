@@ -2,7 +2,7 @@
  * @Author: Mark Arneman
  * @Date:   2017-08-18 11:12:18
  * @Last Modified by:   Mark Arneman
- * @Last Modified time: 2017-08-21 12:35:33
+ * @Last Modified time: 2019-02-20 08:09:00
  */
 
 // Define static constants
