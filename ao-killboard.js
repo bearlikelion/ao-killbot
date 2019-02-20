@@ -1,9 +1,9 @@
 /*
-* @Author: Mark Arneman
-* @Date:   2017-08-18 11:12:18
-* @Last Modified by:   Mark Arneman
-* @Last Modified time: 2017-08-21 12:35:33
-*/
+ * @Author: Mark Arneman
+ * @Date:   2017-08-18 11:12:18
+ * @Last Modified by:   Mark Arneman
+ * @Last Modified time: 2017-08-21 12:35:33
+ */
 
 // Define static constants
 const config = require('./config.json');
@@ -23,7 +23,7 @@ var lastRecordedKill = -1;
  */
 function fetchKills(limit = 51, offset = 0) {
     request({
-        uri: 'https://gameinfo.albiononline.com/api/gameinfo/events?limit='+limit+'&offset='+offset,
+        uri: 'https://gameinfo.albiononline.com/api/gameinfo/events?limit=' + limit + '&offset=' + offset,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode === 200) {
@@ -43,22 +43,24 @@ function parseKills(events) {
     var count = 0;
     var breaker = lastRecordedKill;
 
-    events.some(function(kill, index) {
+    events.some(function (kill, index) {
         // Save the most recent kill for tracking
         if (index == 0) {
             lastRecordedKill = kill.EventId;
         }
 
         // Don't process data for the breaker KILL
-        if (kill.EventId != breaker)
-            // Alliance KILL
+        if (kill.EventId != breaker) {
             if (kill.Killer.AllianceName.toLowerCase() == config.allianceName.toLowerCase() || kill.Victim.AllianceName.toLowerCase() == config.allianceName.toLowerCase()) {
+                // Alliance KILL
                 postKill(kill);
             } else if (kill.Killer.GuildName.toLowerCase() == config.guildName.toLowerCase() || kill.Victim.GuildName.toLowerCase() == config.guildName.toLowerCase()) {
+                // Guild Kill
                 postKill(kill);
-            } else {
-                count++;
             }
+        } else {
+            count++;
+        }
 
         return kill.EventId == breaker;
     });
@@ -68,8 +70,8 @@ function parseKills(events) {
 
 function postKill(kill, channel = config.botChannel) {
     //quick fix to not post kills with 0 fame (like arena kills after the patch)
-    if (kill.TotalVictimKillFame == 0){
-         return;
+    if (kill.TotalVictimKillFame == 0) {
+        return;
     }
 
     var victory = false;
@@ -88,7 +90,7 @@ function postKill(kill, channel = config.botChannel) {
         assistedBy = soloKill[Math.floor(Math.random() * soloKill.length)];
     } else {
         var assists = [];
-        kill.Participants.forEach(function(participant) {
+        kill.Participants.forEach(function (participant) {
             if (participant.Name != kill.Killer.Name) {
                 assists.push(participant.Name);
             }
@@ -97,7 +99,7 @@ function postKill(kill, channel = config.botChannel) {
     }
 
     itemCount = 0;
-    kill.Victim.Inventory.forEach(function(inventory) {
+    kill.Victim.Inventory.forEach(function (inventory) {
         if (inventory !== null) {
             itemCount++;
         }
@@ -113,23 +115,22 @@ function postKill(kill, channel = config.botChannel) {
         author: {
             name: kill.Killer.Name + " killed " + kill.Victim.Name,
             icon_url: victory ? 'https://i.imgur.com/CeqX0CY.png' : 'https://albiononline.com/assets/images/killboard/kill__date.png',
-            url: 'https://albiononline.com/en/killboard/kill/'+kill.EventId
+            url: 'https://albiononline.com/en/killboard/kill/' + kill.EventId
         },
         title: assistedBy + itemsDestroyedText,
         description: 'Gaining ' + kill.TotalVictimKillFame + ' fame',
         thumbnail: {
-            url: (kill.Killer.Equipment.MainHand.Type ? 'https://gameinfo.albiononline.com/api/gameinfo/items/' + kill.Killer.Equipment.MainHand.Type + '.png' : "https://albiononline.com/assets/images/killboard/kill__date.png")
+            url: (kill.Killer.Equipment.MainHand.Type ? 'https://gameinfo.albiononline.com/api/gameinfo/items/' + kill.Killer.Equipment.MainHand.Type + '.png' : 'https://albiononline.com/assets/images/killboard/kill__date.png')
         },
         timestamp: kill.TimeStamp,
-        fields: [
-            {
+        fields: [{
                 name: "Killer Guild",
-                value: (kill.Killer.AllianceName ? "["+kill.Killer.AllianceName+"] " : '') + (kill.Killer.GuildName ? kill.Killer.GuildName : '<none>'),
+                value: (kill.Killer.AllianceName ? "[" + kill.Killer.AllianceName + "] " : '') + (kill.Killer.GuildName ? kill.Killer.GuildName : '<none>'),
                 inline: true
             },
             {
                 name: "Victim Guild",
-                value: (kill.Victim.AllianceName ? "["+kill.Victim.AllianceName+"] " : '') + (kill.Victim.GuildName ? kill.Victim.GuildName : '<none>'),
+                value: (kill.Victim.AllianceName ? "[" + kill.Victim.AllianceName + "] " : '') + (kill.Victim.GuildName ? kill.Victim.GuildName : '<none>'),
                 inline: true
             },
             {
@@ -150,7 +151,9 @@ function postKill(kill, channel = config.botChannel) {
 
     console.log(embed);
 
-    client.channels.get(channel).send({embed: embed});
+    client.channels.get(channel).send({
+        embed: embed
+    });
 }
 
 /**
@@ -167,12 +170,12 @@ client.on('ready', () => {
     }
 
     // Set 'Playing Game' in discord
-    client.user.setGame(config.playingGame); // broken due to discord API changes
+    client.user.setActivity(config.playingGame); // broken due to discord API changes
 
     fetchKills();
 
     // Fetch kills every 30s
-    var timer = setInterval(function() {
+    var timer = setInterval(function () {
         fetchKills();
     }, 30000);
 });
@@ -189,9 +192,7 @@ client.on('message', message => {
         // Test Command - !ping
         if (command === 'ping') {
             message.reply('pong');
-        }
-
-        else if (command === 'kbinfo') {
+        } else if (command === 'kbinfo') {
             request({
                 json: true,
                 uri: 'https://gameinfo.albiononline.com/api/gameinfo/events/' + args[0]
@@ -218,4 +219,8 @@ client.on('message', message => {
     }
 });
 
-client.login(config.token);
+if (config.token) {
+    client.login(config.token);
+} else {
+    console.log("ERROR: No bot token defined")
+}

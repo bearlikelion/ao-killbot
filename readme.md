@@ -19,8 +19,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Installing
 * Install Node JS on the machine that will run the bot
-* Execute 'npm install' in the directory to download the dependencies 
-* Create a new [Discord Application](https://discordapp.com/developers/applications/me)
+* Execute 'npm install' in the directory to download the dependencies
+* Create a new [Discord Application](https://discordapp.com/developers/applications/)
 * Copy config.json.example --> config.json
 * Add the 'APP BOT USER' token as 'token' in 'config.json'
 * Enable developer mode in Discord (Settings -> Appearance)
@@ -29,7 +29,7 @@ These instructions will get you a copy of the project up and running on your loc
 * OPTIONAL: Set User IDs for admin accounts
 
 * **To add the bot to your server**: Visit https://discordapp.com/oauth2/authorize?client_id={YOUR CLIENT ID}
-Example: https://discordapp.com/oauth2/authorize?client_id=975390562344173493
+Example: https://discordapp.com/api/oauth2/authorize?client_id=347919794504335362&permissions=2048&scope=bot
 
 ###### * to only display Guild kills and not alliance, set allianceName to something that cannot exist i.e <NONE>
 
