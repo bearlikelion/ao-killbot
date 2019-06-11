@@ -1,5 +1,8 @@
 {
 	"cmdPrefix": "!",
+	"players": [
+		"Marn",
+	],
 	"allianceName": "<NONE>",
 	"guildName": "8-bit",
 	"username": "AO-Killbot",
