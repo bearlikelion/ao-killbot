@@ -11,11 +11,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
-    "start": "npm run build && node dist/ao-killbot.js"
+    "start": "node ao-killbot.js"
   },
   "dependencies": {
-    "discord.js": "^11.1.0",
-    "request": "^2.81.0"
+    "discord.js": "^11.5.1",
+    "request": "^2.88.0"
   }
 }

@@ -6,20 +6,26 @@
  */
 
 // Define static constants
-try {
-    // Require modules
-    const config = require('./config.json');
-    const Discord = require('discord.js');
-    const request = require('request');
-} catch (error) {
-    console.log(error.message)
-    process.exit
-}
+const config = require('./config.json');
+
+// Require modules
+const Discord = require('discord.js');
+const request = require('request');
 
 if (typeof Discord !== 'undefined') {
     const client = new Discord.Client();
 }
+
 var lastRecordedKill = -1;
+
+if (typeof config !== 'undefined') {
+    // Convert all player names to lowercase
+    var playerNames = [];
+    for (var i = 0; i < config.players.length; i++) {
+        playerNames.push(config.players[i].toLowerCase())
+    }
+}
+
 
 /**
  * Fetch recent kills from the Gameinfo API
@@ -63,7 +69,8 @@ function parseKills(events) {
             } else if (kill.Killer.GuildName.toLowerCase() == config.guildName.toLowerCase() || kill.Victim.GuildName.toLowerCase() == config.guildName.toLowerCase()) {
                 // Guild Kill
                 postKill(kill);
-            } else if (config.players.includes(kill.Killer.Name.toLowerCase())) {
+            } else if (playerNames.includes(kill.Killer.Name.toLowerCase()) || playerNames.includes(kill.Victim.Name.toLowerCase())) {
+                // Player kill
                 postKill(kill);
             }
         } else {
@@ -241,4 +248,5 @@ if (typeof config !== 'undefined') {
     }
 } else {
     console.log("ERROR: No config file")
+    console.log("execute: cp config.json.example config.json")
 }

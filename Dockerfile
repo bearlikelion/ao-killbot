@@ -4,6 +4,6 @@ COPY . /usr/src/app
 
 WORKDIR /usr/src/app
 
-RUN npm install && npm install rimraf && npm install --save-dev babel-cli
+RUN npm install
 
 CMD ["npm","start"]
