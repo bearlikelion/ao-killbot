@@ -12,7 +12,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
-    "start": "npm run build && node dist/ao-killboard.js"
+    "start": "npm run build && node dist/ao-killbot.js"
   },
   "dependencies": {
     "discord.js": "^11.1.0",
