@@ -2,17 +2,23 @@
  * @Author: Mark Arneman
  * @Date:   2017-08-18 11:12:18
  * @Last Modified by:   Mark Arneman
- * @Last Modified time: 2019-02-20 08:09:00
+ * @Last Modified time: 2019-06-11
  */
 
 // Define static constants
-const config = require('./config.json');
+try {
+    // Require modules
+    const config = require('./config.json');
+    const Discord = require('discord.js');
+    const request = require('request');
+} catch (error) {
+    console.log(error.message)
+    process.exit
+}
 
-// Require modules
-const Discord = require('discord.js');
-const request = require('request');
-const client = new Discord.Client();
-
+if (typeof Discord !== 'undefined') {
+    const client = new Discord.Client();
+}
 var lastRecordedKill = -1;
 
 /**
@@ -57,6 +63,8 @@ function parseKills(events) {
             } else if (kill.Killer.GuildName.toLowerCase() == config.guildName.toLowerCase() || kill.Victim.GuildName.toLowerCase() == config.guildName.toLowerCase()) {
                 // Guild Kill
                 postKill(kill);
+            } else if (config.players.includes(kill.Killer.Name.toLowerCase())) {
+                postKill(kill);
             }
         } else {
             count++;
@@ -75,7 +83,9 @@ function postKill(kill, channel = config.botChannel) {
     }
 
     var victory = false;
-    if (kill.Killer.AllianceName.toLowerCase() == config.allianceName.toLowerCase() || kill.Killer.GuildName.toLowerCase() == config.guildName.toLowerCase()) {
+    if (kill.Killer.AllianceName.toLowerCase() == config.allianceName.toLowerCase() ||
+        kill.Killer.GuildName.toLowerCase() == config.guildName.toLowerCase() ||
+        config.players.includes(kill.Killer.Name.toLowerCase())) {
         victory = true;
     }
 
@@ -161,66 +171,74 @@ function postKill(kill, channel = config.botChannel) {
  * If we do not wait for the ready event
  * All commands will process before we are authorized
  */
-client.on('ready', () => {
-    console.log('Ready and waiting!');
+if (typeof client !== 'undefined') {
+    client.on('ready', () => {
+        console.log('Ready and waiting!');
 
-    // If the config.username differs, change it
-    if (client.user.username != config.username) {
-        client.user.setUsername(config.username);
-    }
+        // If the config.username differs, change it
+        if (client.user.username != config.username) {
+            client.user.setUsername(config.username);
+        }
 
-    // Set 'Playing Game' in discord
-    client.user.setActivity(config.playingGame); // broken due to discord API changes
+        // Set 'Playing Game' in discord
+        client.user.setActivity(config.playingGame); // broken due to discord API changes
 
-    fetchKills();
-
-    // Fetch kills every 30s
-    var timer = setInterval(function () {
         fetchKills();
-    }, 30000);
-});
+
+        // Fetch kills every 30s
+        var timer = setInterval(function () {
+            fetchKills();
+        }, 30000);
+    });
+}
 
 /**
  * On receive message
  */
-client.on('message', message => {
-    if (message.content.indexOf(config.cmdPrefix) !== 0 || message.author.bot) return;
-    else { // Execute command!
-        var args = message.content.slice(config.cmdPrefix.length).trim().split(/ +/g);
-        var command = args.shift().toLowerCase();
+if (typeof client !== 'undefined') {
+    client.on('message', message => {
+        if (message.content.indexOf(config.cmdPrefix) !== 0 || message.author.bot) return;
+        else { // Execute command!
+            var args = message.content.slice(config.cmdPrefix.length).trim().split(/ +/g);
+            var command = args.shift().toLowerCase();
 
-        // Test Command - !ping
-        if (command === 'ping') {
-            message.reply('pong');
-        } else if (command === 'kbinfo') {
-            request({
-                json: true,
-                uri: 'https://gameinfo.albiononline.com/api/gameinfo/events/' + args[0]
-            }, function (error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    postKill(body, message.channel.id);
-                } else {
-                    console.log('Error: ', error); // Log the error
-                }
-            });
-        }
+            // Test Command - !ping
+            if (command === 'ping') {
+                message.reply('pong');
+            } else if (command === 'kbinfo') {
+                request({
+                    json: true,
+                    uri: 'https://gameinfo.albiononline.com/api/gameinfo/events/' + args[0]
+                }, function (error, response, body) {
+                    if (!error && response.statusCode === 200) {
+                        postKill(body, message.channel.id);
+                    } else {
+                        console.log('Error: ', error); // Log the error
+                    }
+                });
+            }
 
-        // [ADMIN] - clear config.botChannel messages
-        else if (command === 'kbclear') {
-            if (config.admins.includes(message.author.id) && message.channel.id == config.botChannel) {
-                message.channel.send('Clearing Killboard').then(msg => {
-                    msg.channel.fetchMessages().then(messages => {
-                        message.channel.bulkDelete(messages);
-                        console.log("[ADMIN] " + message.author.username + " cleared Killboard");
+            // [ADMIN] - clear config.botChannel messages
+            else if (command === 'kbclear') {
+                if (config.admins.includes(message.author.id) && message.channel.id == config.botChannel) {
+                    message.channel.send('Clearing Killboard').then(msg => {
+                        msg.channel.fetchMessages().then(messages => {
+                            message.channel.bulkDelete(messages);
+                            console.log("[ADMIN] " + message.author.username + " cleared Killboard");
+                        })
                     })
-                })
+                }
             }
         }
-    }
-});
+    });
+}
 
-if (config.token) {
-    client.login(config.token);
+if (typeof config !== 'undefined') {
+    if (config.token) {
+        client.login(config.token);
+    } else {
+        console.log("ERROR: No bot token defined")
+    }
 } else {
-    console.log("ERROR: No bot token defined")
+    console.log("ERROR: No config file")
 }

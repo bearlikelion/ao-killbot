@@ -1,7 +1,8 @@
 {
 	"cmdPrefix": "!",
 	"players": [
-		"Marn",
+		// lowercase names
+		"marn",
 	],
 	"allianceName": "<NONE>",
 	"guildName": "8-bit",
